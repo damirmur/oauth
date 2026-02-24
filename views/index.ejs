@@ -1,0 +1,62 @@
+<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .header a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <% if (user) { %>
+            <div>Привет, <strong><%= user.email %></strong>!</div>
+            <div>
+                <a href="/me">Мой профиль</a>
+                <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    Выйти
+                </a>
+                <form id="logout-form" action="/auth/logout" method="POST" style="display: none;"></form>
+            </div>
+        <% } else { %>
+            <div>Гость</div>
+            <div>
+                <a href="/register">Регистрация</a>
+                <a href="/login">Войти</a>
+            </div>
+        <% } %>
+    </div>
+
+    <h1>Welcome to my website</h1>
+    <p>Это главная страница. Вы можете войти или зарегистрироваться.</p>
+    <%- include('partials/alerts') %>
+</body>
+</html>
