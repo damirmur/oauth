@@ -53,3 +53,5 @@ coverage/
 
 # Системные файлы
 Thumbs.db
+# Другое
+app_calendar/
