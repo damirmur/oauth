@@ -149,9 +149,9 @@ app.get('/login', async (req, res) => {
     // Если пользователь уже авторизован — редирект на главную
     if (user) {
         req.flash('success', 'С возвращением!');
-        res.redirect('/');
+        return res.redirect('/');
     } 
-    res.render('login', { user: null }); 
+    return res.render('login', { user: null });
 });
 app.post('/auth/login', async (req, res) => {
     const { email, password } = req.body;
