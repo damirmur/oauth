@@ -13,7 +13,7 @@ import { SignJWT, jwtVerify } from 'jose';
 import { APP } from './config/app.js';
 import { PATHS } from './config/paths.js';
 import { COOKIE_SETTINGS } from './config/security.js';
-import * as db from './db.js'; // Импортируем наши методы
+import * as db from './bd/db.js'; // Импортируем наши методы
 import * as mail from './mail_dev/mail.js'; 
 const app = express();
 app.set('trust proxy', 1); // Доверяем прокси-серверу (Nginx)
@@ -44,12 +44,12 @@ app.get('/mail', (req, res) => {
 });
 
 // 2. API для данных
-app.get('/api/emails', async (req, res) => {
+app.get('/api/mail/emails', async (req, res) => {
     res.json(await mail.getEmails());
 });
 
 // 3. API для удаления
-app.delete('/delete/:id', (req, res) => {
+app.delete('/api/mail/emails/delete/:id', (req, res) => {
     res.sendStatus(mail.deleteEmail(req.params.id) ? 200 : 404);
 });// 
 

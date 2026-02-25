@@ -84,7 +84,7 @@ export function getHtmlTemplate(port) {
 
                 async function load() {
                     try {
-                        const res = await fetch('/api/emails');
+                        const res = await fetch('/api/mail/emails');
                         const mails = await res.json();
                         
                         // Если писем стало больше, чем было — сигнализируем
@@ -114,13 +114,13 @@ export function getHtmlTemplate(port) {
                 }
 
                 async function del(id) {
-                    if (confirm('Удалить письмо?')) {
-                        const res = await fetch('/delete/' + id, { method: 'DELETE' });
+                    
+                        const res = await fetch('/api/mail/emails/delete/' + id, { method: 'DELETE' });
                         if (res.ok) {
                             document.getElementById('card-' + id).remove();
                             lastCount--; // Уменьшаем счетчик, чтобы не сработало уведомление
                         }
-                    }
+                    
                 }
 
                 setInterval(load, 5000); // Проверка каждые 5 секунд для большей отзывчивости
