@@ -30,6 +30,12 @@ body {
     text-decoration: underline;
 }
 
+.disabled-link {
+    color: #999;
+    margin-left: 15px;
+    cursor: not-allowed;
+}
+
 h1 {
     color: #333;
 }

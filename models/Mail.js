@@ -1,6 +1,6 @@
 import fs from 'node:fs';
-import path from'node:path';
-import { simpleParser  } from 'mailparser';
+import path from 'node:path';
+import { simpleParser } from 'mailparser';
 
 const mailDir = path.join(process.env.HOME, 'Maildir/new');
 
@@ -24,7 +24,9 @@ export async function getEmails() {
                 subject: parsed.subject || '(Без темы)',
                 text: linkify(parsed.text || "")
             });
-        } catch (e) { console.error("Ошибка парсинга:", file); }
+        } catch (e) { 
+            console.error("Ошибка парсинга:", file); 
+        }
     }
     return emails;
 }
@@ -129,5 +131,4 @@ export function getHtmlTemplate(port) {
         </body>
     </html>`;
 }
-
 

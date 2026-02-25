@@ -1,0 +1,45 @@
+<!-- views/user_profile.ejs -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой профиль</title>
+    <link rel="stylesheet" href="/stylesheets/main.css">
+</head>
+<body>
+    <div class="header">
+        <div>Привет, <strong><%= profile && profile.name ? profile.name : user.email %></strong>!</div>
+        <div>
+            <a href="/">Главная</a>
+            <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                Выйти
+            </a>
+            <form id="logout-form" action="/auth/logout" method="POST" class="hidden-form"></form>
+        </div>
+    </div>
+
+    <div class="content">
+        <h1>Мой профиль</h1>
+        
+        <% if (profile) { %>
+        <div class="profile-info">
+            <form action="/me/update-name" method="POST">
+                <div class="form-group">
+                    <label for="name">Имя:</label>
+                    <input type="text" id="name" name="name" value="<%= profile.name || '' %>" placeholder="Введите имя" />
+                    <button type="submit">Сохранить</button>
+                </div>
+            </form>
+            <p><strong>Email:</strong> <%= user.email %></p>
+            <p><strong>Роль:</strong> <%= profile.role %></p>
+        </div>
+        <% } else { %>
+        <p>Профиль не найден.</p>
+        <% } %>
+    </div>
+    
+    <%- include('partials/alerts') %>
+</body>
+</html>
+
