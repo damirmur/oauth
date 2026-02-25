@@ -60,19 +60,26 @@ app.get('/register', async (req, res) => {
 //
 app.get('/', async (req, res) => {
     let user = null;
+    let profile = null;
     // Проверяем токен из куки
     const token = req.cookies.token;
     if (token) {
         try {
             const { payload } = await jwtVerify(token, SECRET);
             user = payload;
+            
+            // Получаем профиль пользователя
+            const dbUser = db.getUserByEmail(user.email);
+            if (dbUser) {
+                profile = db.getUserProfile(dbUser.id);
+            }
         } catch (err) {
             // Токен невалидный или просрочен — игнорируем
         }
     }
 
-    // Рендерим шаблон с передачей user
-    return res.render('index', { user });
+    // Рендерим шаблон с передачей user и profile
+    return res.render('index', { user, profile });
 });
 // Регистрация: отправка ссылки
 app.post('/auth/register', async (req, res) => {
@@ -235,18 +242,63 @@ app.post('/auth/reset-password', async (req, res) => {
     req.flash('error', 'Ошибка при сбросе. Возможно, ссылка истекла.');
     return res.redirect('/forgot-password');
 });
-// ЗАЩИЩЕННЫЙ РОУТ (Пример авторизации)
+// Страница профиля пользователя
 app.get('/me', async (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).send();
+    const token = req.cookies.token;
+    if (!token) {
+        req.flash('error', 'Сначала войдите в систему');
+        return res.redirect('/login');
+    }
 
     try {
         const { payload } = await jwtVerify(token, SECRET);
-        res.json({ user: payload });
+        
+        // Получаем пользователя из БД по email
+        const user = db.getUserByEmail(payload.email);
+        if (!user) {
+            req.flash('error', 'Пользователь не найден');
+            return res.redirect('/login');
+        }
+        
+        // Получаем профиль пользователя
+        const profile = db.getUserProfile(user.id);
+        
+        return res.render('user_profile', { user: payload, profile });
     } catch (e) {
-        res.status(403).json({ error: 'Токен протух' });
+        req.flash('error', 'Сессия истекла. Войдите заново');
+        return res.redirect('/login');
     }
 });
+
+// Обновление имени пользователя
+app.post('/me/update-name', async (req, res) => {
+    const token = req.cookies.token;
+    if (!token) {
+        req.flash('error', 'Сначала войдите в систему');
+        return res.redirect('/login');
+    }
+
+    try {
+        const { payload } = await jwtVerify(token, SECRET);
+        
+        // Получаем пользователя из БД по email
+        const user = db.getUserByEmail(payload.email);
+        if (!user) {
+            req.flash('error', 'Пользователь не найден');
+            return res.redirect('/login');
+        }
+        
+        const { name } = req.body;
+        db.updateUserProfile(user.id, name, null);
+        
+        req.flash('success', 'Имя успешно обновлено!');
+        return res.redirect('/me');
+    } catch (e) {
+        req.flash('error', 'Ошибка при обновлении имени');
+        return res.redirect('/me');
+    }
+});
+
 const PORT = APP.PORT || env.PORT || 3000;
 
 app.listen(PORT, () => {

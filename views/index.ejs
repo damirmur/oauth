@@ -10,7 +10,7 @@
 <body>
     <div class="header">
         <% if (user) { %>
-            <div>Привет, <strong><%= user.email %></strong>!</div>
+            <div>Привет, <strong><%= profile && profile.name ? profile.name : user.email %></strong>!</div>
             <div>
                 <a href="/me">Мой профиль</a>
                 <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -18,9 +18,10 @@
                 </a>
                 <form id="logout-form" action="/auth/logout" method="POST" class="hidden-form"></form>
             </div>
-        <% } else { %>
+<% } else { %>
             <div>Гость</div>
             <div>
+                <span class="disabled-link">Мой профиль</span>
                 <a href="/register">Регистрация</a>
                 <a href="/login">Войти</a>
             </div>
