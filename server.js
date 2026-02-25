@@ -14,7 +14,7 @@ import { APP } from './config/app.js';
 import { PATHS } from './config/paths.js';
 import { COOKIE_SETTINGS } from './config/security.js';
 import * as db from './bd/db.js'; // Импортируем наши методы
-import * as mail from './mail_dev/mail.js'; 
+import mailRouter from './routes/mail.js';
 const app = express();
 app.set('trust proxy', 1); // Доверяем прокси-серверу (Nginx)
 app.use(express.urlencoded({ extended: true }));
@@ -37,22 +37,8 @@ app.use((req, res, next) => {
 
 app.use(express.static(PATHS.PUBLIC));
 
-//mail
-// 1. Страница интерфейса
-app.get('/mail', (req, res) => {
-    res.send(mail.getHtmlTemplate(PORT));
-});
-
-// 2. API для данных
-app.get('/api/mail/emails', async (req, res) => {
-    res.json(await mail.getEmails());
-});
-
-// 3. API для удаления
-app.delete('/api/mail/emails/delete/:id', (req, res) => {
-    res.sendStatus(mail.deleteEmail(req.params.id) ? 200 : 404);
-});// 
-
+// Mail routes
+app.use(mailRouter);
 
 app.get('/register', async (req, res) => {
     let user = null;
