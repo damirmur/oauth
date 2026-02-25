@@ -65,3 +65,66 @@ h2 {
     text-decoration: underline;
 }
 
+/* OAuth Buttons */
+.oauth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.oauth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    transition: opacity 0.2s;
+}
+
+.oauth-btn:hover {
+    opacity: 0.9;
+}
+
+.oauth-btn.google {
+    background-color: #4285F4;
+}
+
+.oauth-btn.facebook {
+    background-color: #1877F2;
+}
+
+.oauth-btn.vk {
+    background-color: #0077FF;
+}
+
+.oauth-btn svg {
+    flex-shrink: 0;
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: #888;
+    font-size: 14px;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: #ddd;
+}
+
+.divider span {
+    padding: 0 10px;
+}
+

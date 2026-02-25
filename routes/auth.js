@@ -41,5 +41,22 @@ router.post('/auth/forgot-password', authController.forgotPassword);
 // POST /auth/reset-password - Handle password reset
 router.post('/auth/reset-password', authController.resetPassword);
 
+// ==================== OAuth Routes ====================
+
+// Google
+router.get('/auth/google', authController.authGoogle);
+router.get('/auth/google/callback', authController.authGoogleCallback);
+
+// Facebook
+router.get('/auth/facebook', authController.authFacebook);
+router.get('/auth/facebook/callback', authController.authFacebookCallback);
+
+// VKontakte
+router.get('/auth/vk', authController.authVk);
+router.get('/auth/vk/callback', authController.authVkCallback);
+
+// Telegram (via form POST from widget)
+router.post('/auth/telegram', authController.authTelegram);
+
 export default router;
 

@@ -2,6 +2,8 @@ import { DatabaseSync } from 'node:sqlite';
 
 const db = new DatabaseSync('bd/auth.db');
 
+// ==================== Database Initialization ====================
+
 // Initialize roles table
 db.exec(`
   CREATE TABLE IF NOT EXISTS roles (
@@ -22,10 +24,16 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT UNIQUE,
     password_hash TEXT,
-    is_verified INTEGER DEFAULT 0,
+    is_verified INTEGER DEFAULT 1,
     token TEXT,
     reset_token TEXT,
-    reset_token_expires INTEGER
+    reset_token_expires INTEGER,
+    google_id TEXT UNIQUE,
+    facebook_id TEXT UNIQUE,
+    vk_id TEXT UNIQUE,
+    telegram_id TEXT UNIQUE,
+    oauth_provider TEXT,
+    avatar_url TEXT
   )
 `);
 
@@ -79,6 +87,38 @@ export const getUserByResetToken = (token) =>
 
 export const updatePassword = (id, hash) => 
     db.prepare('UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?').run(hash, id);
+
+// ==================== OAuth Methods ====================
+
+export const getUserByGoogleId = (googleId) => 
+    db.prepare('SELECT * FROM users WHERE google_id = ?').get(googleId);
+
+export const getUserByFacebookId = (facebookId) => 
+    db.prepare('SELECT * FROM users WHERE facebook_id = ?').get(facebookId);
+
+export const getUserByVkId = (vkId) => 
+    db.prepare('SELECT * FROM users WHERE vk_id = ?').get(vkId);
+
+export const getUserByTelegramId = (telegramId) => 
+    db.prepare('SELECT * FROM users WHERE telegram_id = ?').get(telegramId);
+
+export const createOAuthUser = (email, provider, providerId, name, avatarUrl) => {
+    const result = db.prepare(
+        `INSERT INTO users (email, ${provider}_id, oauth_provider, avatar_url, is_verified) 
+         VALUES (?, ?, ?, ?, 1)`
+    ).run(email, providerId, provider, avatarUrl);
+    
+    const userId = result.lastInsertRowid;
+    
+    // Auto-create profile with "user" role
+    const userRoleId = getRoleIdByName('user');
+    db.prepare('INSERT INTO users_profile (user_id, name, role_id) VALUES (?, ?, ?)').run(userId, name || '', userRoleId);
+    
+    return userId;
+};
+
+export const updateUserAvatar = (userId, avatarUrl) => 
+    db.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').run(avatarUrl, userId);
 
 // ==================== Profile Methods ====================
 

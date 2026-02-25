@@ -3,6 +3,7 @@ import flash from 'connect-flash';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import { jwtVerify } from 'jose';
+import passport from 'passport';
 import 'dotenv/config';
 import { env } from 'node:process';
 
@@ -11,6 +12,7 @@ import * as db from './bd/db.js';
 import authRouter from './routes/auth.js';
 import userRouter from './routes/user.js';
 import mailRouter from './routes/mail.js';
+import './config/passport.js';
 
 const app = express();
 
@@ -31,6 +33,10 @@ app.use(session({
 }));
 
 app.use(flash());
+
+// Initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use((req, res, next) => {
     res.locals.flash_success = req.flash('success');

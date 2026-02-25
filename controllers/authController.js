@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
 import { exec } from 'node:child_process';
 import argon2 from 'argon2';
-import { SignJWT } from 'jose';
+import { SignJWT, jwtVerify } from 'jose';
+import passport from 'passport';
 import * as User from '../models/User.js';
 import { APP } from '../config/app.js';
 import { COOKIE_SETTINGS } from '../config/security.js';
@@ -162,6 +163,94 @@ export const resetPassword = async (req, res) => {
     return res.redirect('/forgot-password');
 };
 
+// ==================== OAuth Routes ====================
+
+export const authGoogle = passport.authenticate('google', { scope: ['profile', 'email'] });
+
+export const authGoogleCallback = async (req, res) => {
+    const user = req.user;
+    if (user) {
+        const jwt = await new SignJWT({ email: user.email })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setExpirationTime('24h')
+            .sign(getSecret());
+        res.cookie('token', jwt, COOKIE_SETTINGS);
+        req.flash('success', 'Вы вошли через Google!');
+        return res.redirect('/');
+    }
+    req.flash('error', 'Ошибка авторизации через Google');
+    return res.redirect('/login');
+};
+
+export const authFacebook = passport.authenticate('facebook', { scope: ['email'] });
+
+export const authFacebookCallback = async (req, res) => {
+    const user = req.user;
+    if (user) {
+        const jwt = await new SignJWT({ email: user.email })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setExpirationTime('24h')
+            .sign(getSecret());
+        res.cookie('token', jwt, COOKIE_SETTINGS);
+        req.flash('success', 'Вы вошли через Facebook!');
+        return res.redirect('/');
+    }
+    req.flash('error', 'Ошибка авторизации через Facebook');
+    return res.redirect('/login');
+};
+
+export const authVk = passport.authenticate('vkontakte');
+
+export const authVkCallback = async (req, res) => {
+    const user = req.user;
+    if (user) {
+        const jwt = await new SignJWT({ email: user.email })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setExpirationTime('24h')
+            .sign(getSecret());
+        res.cookie('token', jwt, COOKIE_SETTINGS);
+        req.flash('success', 'Вы вошли через VK!');
+        return res.redirect('/');
+    }
+    req.flash('error', 'Ошибка авторизации через VK');
+    return res.redirect('/login');
+};
+
+// Telegram OAuth (via Telegram Login Widget)
+export const authTelegram = async (req, res) => {
+    const { id, first_name, last_name, photo_url, hash } = req.body;
+    
+    if (!id || !hash) {
+        req.flash('error', 'Неверные данные от Telegram');
+        return res.redirect('/login');
+    }
+    
+    // In production, verify hash (telegram login widget data)
+    // For now, we'll create/find user by telegram_id
+    try {
+        let user = User.getUserByTelegramId(String(id));
+        
+        if (!user) {
+            const name = [first_name, last_name].filter(Boolean).join(' ');
+            const email = `telegram_${id}@oauth.local`;
+            const userId = User.createOAuthUser(email, 'telegram', String(id), name, photo_url);
+            user = User.getUserById(userId);
+        }
+        
+        const jwt = await new SignJWT({ email: user.email })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setExpirationTime('24h')
+            .sign(getSecret());
+        res.cookie('token', jwt, COOKIE_SETTINGS);
+        req.flash('success', 'Вы вошли через Telegram!');
+        return res.redirect('/');
+    } catch (err) {
+        console.error('Telegram OAuth error:', err);
+        req.flash('error', 'Ошибка авторизации через Telegram');
+        return res.redirect('/login');
+    }
+};
+
 // ==================== Helpers ====================
 
 const getCurrentUserFromRequest = async (req) => {
@@ -175,7 +264,4 @@ const getCurrentUserFromRequest = async (req) => {
         return null;
     }
 };
-
-// Import jwtVerify for helper
-import { jwtVerify } from 'jose';
 
